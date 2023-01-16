@@ -1,0 +1,28 @@
+version: '3'
+services:
+  rabbitmq:
+    build:
+      context: ./docker/rabbitmq
+      dockerfile: Dockerfile
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    volumes:
+      # - ./docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      # - ./docker/rabbitmq/plugins:/opt/rabbitmq/plugins
+      - ./rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "8080:15672"
+      - "5672:5672"
+      - "25672:25672"
+
+  mysql:
+    image: mysql:8.0.31
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin
+    volumes:
+      - ./mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"      

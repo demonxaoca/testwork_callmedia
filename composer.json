@@ -1,0 +1,17 @@
+{
+    "name": "dk/testwork_callmedia",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Dk\\TestworkCallmedia\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Kuznetsov Dmitry"
+        }
+    ],
+    "require": {
+        "php-amqplib/php-amqplib": "^3.4"
+    }
+}
