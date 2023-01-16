@@ -17,6 +17,7 @@ class Consumer {
     function process(Closure $cb) {
         $this->channel->basic_consume($this->queue, '', false, false, false, false, $cb);
         $this->channel->consume();
+
     }
 
 
