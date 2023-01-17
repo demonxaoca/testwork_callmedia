@@ -21,9 +21,9 @@ class Producer {
         $this->exchange = $exchange;
     }
 
-    function publish(string $messageBody = '', int $delay = 30_000) {
+    function publish(string $messageBody = '', int $delay = 30_000, $isRepeat = false) {
         $headers = new AMQPTable(array('x-delay' => $delay));
-        $message = new AMQPMessage($messageBody, array('content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
+        $message = new AMQPMessage(json_encode(['url' => $messageBody, 'isRepeat' => $isRepeat]), array('content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
         $message->set('application_headers', $headers);
         $this->channel->basic_publish($message, $this->exchange);
         echo "message send" . PHP_EOL;

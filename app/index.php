@@ -9,6 +9,7 @@ use Dk\TestworkCallmedia\amqp\consumers\Consumer;
 use PhpAmqpLib\Message\AMQPMessage;
 
 $connection = new Connection('rabbitmq', '5672', 'admin', 'admin');
+//$connection = new Connection('localhost', '5672', 'admin', 'admin');
 $producer = new Producer($connection, 'urls', 'urls_exchange');
 [$file, $url] = $argv;
 $producer->publish($url);

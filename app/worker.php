@@ -11,11 +11,15 @@ use Dk\TestworkCallmedia\amqp\producers\Producer;
 
 $db = new Db('mysql', '3306', 'testwork', 'root', 'admin');
 $connection = new Connection('rabbitmq', '5672', 'admin', 'admin');
+// $db = new Db('localhost', '3306', 'testwork', 'root', 'admin');
+// $connection = new Connection('localhost', '5672', 'admin', 'admin');
 $producer = new Producer($connection, 'urls', 'urls_exchange');
 $consumer = new Consumer($connection, 'urls');
 echo 'run consumer' . PHP_EOL;
 $consumer->process(function (AMQPMessage $message) use ($db, $producer) {
-    $url = $message->body;
+    $obj = json_decode($message->body);
+    $url = $obj->url;
+    $isRepeat = $obj->isRepeat;
     $ch = curl_init($url);
     $headers = [];
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -37,8 +41,12 @@ $consumer->process(function (AMQPMessage $message) use ($db, $producer) {
     $statusCode = $params['http_code'];
 
     if ($statusCode !== 200) {
-        echo "repeat message [{$url}]" . PHP_EOL;
-        $producer->publish($url, 15000);
+        if (!$isRepeat) {
+            echo "repeat message [{$url}]" . PHP_EOL;
+            $producer->publish($url, 15000, true);
+        } else {
+            echo "message already repeated, finish" . PHP_EOL;
+        }
         $message->ack();
         return;
     }
@@ -65,7 +73,7 @@ $consumer->process(function (AMQPMessage $message) use ($db, $producer) {
 
         $stmtHeaders = $db->pdo->prepare($queryHeaders);
         $stmtHeaders->execute($values);
-
+        
         $db->pdo->commit();
     } catch (\Exception $e) {
         print_r($e);
