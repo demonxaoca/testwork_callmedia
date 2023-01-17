@@ -24,7 +24,7 @@ $consumer->process(function (AMQPMessage $message) use ($db, $producer) {
     $headers = [];
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$headers) {
         $len = strlen($header);
         $header = explode(':', $header, 2);
@@ -36,7 +36,7 @@ $consumer->process(function (AMQPMessage $message) use ($db, $producer) {
         return $len;
     });
     curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-    curl_exec($ch);
+    $response = curl_exec($ch);
     $params = curl_getinfo($ch);
     $statusCode = $params['http_code'];
 
@@ -51,10 +51,11 @@ $consumer->process(function (AMQPMessage $message) use ($db, $producer) {
         return;
     }
 
-    $query = "INSERT INTO `urls` (`url`, `status_code`) VALUES (:url, :status_code)";
+    $query = "INSERT INTO `urls` (`url`, `status_code`, `response`) VALUES (:url, :status_code, :response)";
     $params = [
         ':url' => $url,
-        ':status_code' => $statusCode
+        ':status_code' => $statusCode,
+        ':response' => $response,
     ];
     $db->pdo->beginTransaction();
     try {
